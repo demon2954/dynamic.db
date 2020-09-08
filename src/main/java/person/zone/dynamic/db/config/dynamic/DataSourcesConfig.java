@@ -22,20 +22,16 @@ public class DataSourcesConfig {
 	@Autowired
 	private JpaProperties jpaProperties;
 
-	@Bean(name = "tenantADataSource")
-	@Qualifier("tenantADataSource")
+	@Bean
 	@Primary
 	@ConfigurationProperties(prefix = "spring.datasource.tenant-a")
 	public DataSource tenantADataSource() {
-		System.out.println("tenantA db built");
 		return DataSourceBuilder.create().build();
 	}
 
-	@Bean(name = "tenantBDataSource")
-	@Qualifier("tenantBDataSource")
+	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource.tenant-b")
 	public DataSource tenantBDataSource() {
-		System.out.println("tenantB db built");
 		return DataSourceBuilder.create().build();
 	}
 
