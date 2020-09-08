@@ -1,8 +1,12 @@
 package person.zone.dynamic.db.controller;
 
 import java.util.HashMap;
+import java.util.Set;
+
+import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +19,7 @@ import person.zone.dynamic.db.dao.tenant.repository.EmployeeRepository;
 public class DbAgentTestController {
 	@Autowired
 	EmployeeRepository employeeRepository;
-
+	
 	// 在子容器中 注入一个 WebApplicationContext 的实例
 	@Autowired
 	private WebApplicationContext webApplicationContext;

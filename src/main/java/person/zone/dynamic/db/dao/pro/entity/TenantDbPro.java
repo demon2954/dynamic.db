@@ -32,11 +32,11 @@ public class TenantDbPro {
 	private String driverClassName;
 
 	@Column(name = "max_active", nullable = true, length = 4)
-	private int maxActive;
+	private Integer maxActive;
 
 	@Column(name = "max_idle", nullable = true, length = 4)
-	private int maxIdle;
+	private Integer maxIdle;
 
 	@Column(name = "min_idle", nullable = true, length = 4)
-	private int minIdle;
+	private Integer minIdle;
 }
