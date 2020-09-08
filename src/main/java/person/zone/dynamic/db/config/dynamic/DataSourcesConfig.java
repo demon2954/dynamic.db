@@ -1,7 +1,9 @@
 package person.zone.dynamic.db.config.dynamic;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -9,40 +11,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
+import person.zone.dynamic.db.dao.pro.entity.TenantDbPro;
+import person.zone.dynamic.db.dao.pro.repository.TenantDbProRepository;
+
+@Order(-1)
 @Configuration
+@EnableJpaRepositories(
+		entityManagerFactoryRef = "entityManagerFactory",
+		transactionManagerRef = "transactionManager", 
+		basePackages = { "person.zone.dynamic.db.dao.tenant.repository" }) // 设置Repository所在位置
 public class DataSourcesConfig {
 	@Autowired
 	private JpaProperties jpaProperties;
 
+	@Autowired
+	private TenantDbProRepository tenantDbProRepository;
+
 	@Value("${spring.jpa.properties.hibernate.dialect}")
 	private String hibernateDialect;
 
-	@Bean
-	@Primary
-	@ConfigurationProperties(prefix = "spring.datasource.tenant-a")
-	public DataSource tenantADataSource() {
-		return DataSourceBuilder.create().build();
-	}
-
-	@Bean
-	@ConfigurationProperties(prefix = "spring.datasource.tenant-b")
-	public DataSource tenantBDataSource() {
-		return DataSourceBuilder.create().build();
-	}
-
 	private Map<Object, Object> dbSourceInstanceMap() {
 		Map<Object, Object> map = new HashMap<Object, Object>();
-		map.put("tenantA", tenantADataSource());
-		map.put("tenantB", tenantBDataSource());
+		List<TenantDbPro> dbProList = tenantDbProRepository.findAll();
+		for (TenantDbPro onePro : dbProList) {
+			DataSource oneDS = DataSourceBuilder.create().url(onePro.getJdbcUrl())
+					.driverClassName(onePro.getDriverClassName())
+					.username(onePro.getUsername())
+					.password(onePro.getPassword())
+					.build();
+			map.put(onePro.getTenantId(), oneDS);
+		}
 		return map;
 	}
 
@@ -51,7 +58,13 @@ public class DataSourcesConfig {
 	public DynamicDataSource dynamicDataSource() {
 		DynamicDataSource dds = new DynamicDataSource();
 		dds.setTargetDataSources(dbSourceInstanceMap());
-		dds.setDefaultTargetDataSource(tenantADataSource());
+		Set<Object> keySet = dbSourceInstanceMap().keySet();
+		DataSource defaultDataSource = null;
+		for (Object one : keySet) {
+			defaultDataSource = (DataSource) dbSourceInstanceMap().get(one);
+			break;
+		}
+		dds.setDefaultTargetDataSource(defaultDataSource);
 		return dds;
 	}
 
@@ -64,7 +77,7 @@ public class DataSourcesConfig {
 		jpaVendorAdapter.setDatabasePlatform(hibernateDialect);
 		jpaVendorAdapter.setShowSql(true);
 		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
-		entityManagerFactoryBean.setPackagesToScan("person.zone.dynamic.db.dao.entity");
+		entityManagerFactoryBean.setPackagesToScan("person.zone.dynamic.db.dao.tenant.entity");
 		entityManagerFactoryBean.setJpaPropertyMap(jpaProperties.getProperties());
 		return entityManagerFactoryBean;
 	}

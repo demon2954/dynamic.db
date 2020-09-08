@@ -1,4 +1,4 @@
-package person.zone.dynamic.db.dao.entity;
+package person.zone.dynamic.db.dao.tenant.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
