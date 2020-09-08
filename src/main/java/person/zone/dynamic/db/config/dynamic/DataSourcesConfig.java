@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -21,6 +22,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 public class DataSourcesConfig {
 	@Autowired
 	private JpaProperties jpaProperties;
+
+	@Value("${spring.jpa.properties.hibernate.dialect}")
+	private String hibernateDialect;
 
 	@Bean
 	@Primary
@@ -57,7 +61,7 @@ public class DataSourcesConfig {
 		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactoryBean.setDataSource(dynamicDataSource());
 		HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
-		jpaVendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
+		jpaVendorAdapter.setDatabasePlatform(hibernateDialect);
 		jpaVendorAdapter.setShowSql(true);
 		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
 		entityManagerFactoryBean.setPackagesToScan("person.zone.dynamic.db.dao.entity");
