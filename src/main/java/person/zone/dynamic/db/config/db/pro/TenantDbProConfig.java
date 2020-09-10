@@ -1,4 +1,4 @@
-package person.zone.dynamic.db.config.pro;
+package person.zone.dynamic.db.config.db.pro;
 
 import java.util.Map;
 

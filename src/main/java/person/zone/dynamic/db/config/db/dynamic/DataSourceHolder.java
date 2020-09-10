@@ -1,4 +1,4 @@
-package person.zone.dynamic.db.config.dynamic;
+package person.zone.dynamic.db.config.db.dynamic;
 
 public class DataSourceHolder {
 
